@@ -1,15 +1,11 @@
 import os
 import tkinter as tk
-import ctypes
 from tkinter import filedialog
 from tkinter import messagebox
 from pathlib import Path
 from pyzbar.pyzbar import decode
 from PIL import Image
 from pdf2image import convert_from_path
-
-ctypes.windll.kernel32.SetDllDirectoryW("dynlib.dll")
-ctypes.windll.kernel32.SetDllDirectoryW("libiconv.dll")
 
 def get_codes_from_file(codes_file):
     codes_list = []
@@ -39,12 +35,11 @@ def check(file, outputDir, codes_list):
 
 
 def print_error_barcodes(erorrs_codes):
-    if len(erorrs_codes) == 0:
-        print('All Corrent')
-    else:
-        print('Erorrs')
+    codes = ''
+    if len(erorrs_codes) != 0:
         for i in erorrs_codes:
-            print('Barcode ', i[0], 'has no code in list', i[1])
+            codes += (' ' + i[0] + ' ' + i[1] + '\n')
+    return codes
 
 
 
@@ -59,31 +54,27 @@ def file_dialog():
 
 def btn_find_pdf_path():
     path = file_dialog()
-    print(path)
     entry_path_pdf.delete(0, tk.END)
     entry_path_pdf.insert(0, path)
 
 def btn_find_codes_path():
     path = file_dialog()
-    
-    print(path)
     entry_path_codes.delete(0, tk.END)
     entry_path_codes.insert(0, path)
 
 def check_barcodes():
-    erorrs_codes = get_pdf_path()
-    print_error_barcodes(erorrs_codes)
-    messagebox.showerror(title='Error', message='error')
+    errors_codes = get_pdf_path()
+    error = print_error_barcodes(errors_codes)
+    if len(errors_codes) == 0:
+        messagebox.showerror(title='All correct', message='All correct')
+    else:
+        messagebox.showerror(title='Error', message='error\n' + error)
 
 def get_pdf_path():
     path_pds = entry_path_pdf.get()
     path_codes = entry_path_codes.get()
     codes_list = get_codes_from_file(path_codes)
     erorrs_codes = check(path_pds, "imag/", codes_list)
-    if path_pds:
-        print(path_pds)
-    else:
-        print('Empty')
     return erorrs_codes
 
 window = tk.Tk()
